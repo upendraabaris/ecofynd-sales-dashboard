@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "localhost",
     port: 8080,
+    allowedHosts: [
+        'shcanary.platinum-infotech.com'
+      ],
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',

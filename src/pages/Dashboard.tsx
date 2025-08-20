@@ -42,6 +42,7 @@ const Dashboard = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [topUnits, setTopUnits] = useState([]);
+  const [vendorTransferData, setVendorTransferData] = useState<VendorTransferStatsResponse | null>(null);
   const [chartData, setChartData] = useState({
     top_selling_by_units: [],
     top_returned_units: [],
@@ -90,6 +91,10 @@ const Dashboard = () => {
         params: { start_date: startDate, end_date: endDate },
       });
 
+      const vendorTransferSummary = await api.get("/sales/vendor-transfer-profit", {
+        params: { start_date: startDate, end_date: endDate },
+      });
+
 
       setTopProfitable(profitableData.data);
       setTopLosses(lossData.data.top_loss_making_products);
@@ -102,6 +107,7 @@ const Dashboard = () => {
         top_returned_units: fetchTopUnits.data.top_returned_units ?? [],
         top_rto_units: fetchTopUnits.data.top_rto_units ?? [],
       });
+      setVendorTransferData(vendorTransferSummary.data.vendor_transfer);
     } catch (err) {
       console.error("API error", err);
     } finally {
@@ -268,8 +274,9 @@ const Dashboard = () => {
         />
         <StatsCard
           title="Total Vendor Transfer"
-          value={`₹${((data?.top_profitable_products?.total_vendor_transfer ?? 0) + (data1?.total_vendor_transfer ?? 0))?.toFixed(2)}`}
-          comparison_percent={topProfitable?.comparison?.total_vendor_transfer?.percent_change}
+          value={`₹${((data?.total_vendor_transfer ?? 0) + (data1?.total_vendor_transfer ?? 0))?.toFixed(2)}`}
+          comparison_percent={vendorTransferData?.percent_change}
+          status={vendorTransferData?.status}
           icon={IndianRupee}
           // description="Total revenue minus costs"
           trend="up"
@@ -300,7 +307,7 @@ const Dashboard = () => {
         <div className="my-5">
           <ProfitChart
             title="Top Profitable Products"
-            data={topProfitable ?? []}
+            data={topProfitable.top_profitable_products ?? []}
             dataKey="profit_amount"
             color="#4CAF50"
             legendLabel="Profit (₹)"
@@ -333,7 +340,7 @@ const Dashboard = () => {
 
         <div className="my-5">
           <PieChartComp
-            title="Returned To Varee (RTV) Products"
+            title="Top Returned To Varee (RTV) Products"
             data={chartData.top_returned_units ?? []}
             dataKey="units_returned"
             color="#FF9800"
@@ -346,7 +353,7 @@ const Dashboard = () => {
       </div>
       <div className="my-5">
         <ProfitChart
-          title="RTO Products"
+          title="Top RTO Products"
           data={chartData.top_rto_units ?? []}
           dataKey="units_rto"
           color="#9C27B0"

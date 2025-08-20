@@ -93,6 +93,17 @@ export interface DailySales {
   daily_exchanged_count?: number;
 }
 
+export interface VendorTransferData {
+  current: number;
+  previous: number;
+  percent_change: number;
+  status: "increase" | "decrease" | "no_change";
+}
+
+export interface VendorTransferStatsResponse {
+  vendor_transfer: VendorTransferData;
+}
+
 
 // Mock data for the dashboard
 export const mockProducts: Product[] = [

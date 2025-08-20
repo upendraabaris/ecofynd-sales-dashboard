@@ -42,7 +42,7 @@ const ProfitChart = ({ data, title, dataKey, color, legendLabel, tooltipLabel }:
   return (
     <div className="w-full h-80 bg-white shadow-md p-4 rounded-xl">
       <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="90%">
         <BarChart data={data}>
           <XAxis dataKey="sku" className='text-xs'/>
           <YAxis />

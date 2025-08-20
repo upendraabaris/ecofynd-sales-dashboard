@@ -20,6 +20,7 @@ import { format, subDays, startOfMonth, startOfYear } from "date-fns";
 import { Value } from "@radix-ui/react-select";
 import AreaChartComp from "@/components/dashboard/AreaChartComp";
 import PieChartComp from "@/components/dashboard/PieChartComp";
+import { Button } from "@/components/ui/button";
 
 const presetOptions = [
   { label: 'Select Date', Value: "select_date"},
@@ -53,6 +54,31 @@ const Dashboard = () => {
   const [salesData, setSalesData] = useState<SalesSummaryResponse | null>(null);
 
   const [selectedPreset, setSelectedPreset] = useState("select_date");
+  const [activeTab, setActiveTab] = useState("returned");
+
+  const products = topProfitable?.top_profitable_products ?? [];
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5; // ek page pe kitni rows chahiye
+
+  // Total pages
+  const totalPages = Math.ceil(products.length / rowsPerPage);
+
+  // Slice data for current page
+  const paginatedData = products.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+
+  const [currentPageLoss, setCurrentPageLoss] = useState(1);
+  const rowsPerPage2 = 5;
+
+  const totalPages2 = Math.ceil(topLosses.length / rowsPerPage2);
+
+  const paginatedData2 = topLosses.slice(
+    (currentPageLoss - 1) * rowsPerPage2,
+    currentPageLoss * rowsPerPage2
+  );
 
   // useEffect(() => {
   //   loadData(); // initial call with no date filter
@@ -338,20 +364,34 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className="my-5">
-          <PieChartComp
-            title="Top Returned To Varee (RTV) Products"
-            data={chartData.top_returned_units ?? []}
-            dataKey="units_returned"
-            color="#FF9800"
-            legendLabel="Units Returned"
-            tooltipLabel="Returned Units"
-          />
-        </div>
-
-
+         <div className="my-5 p-4 rounded-2xl bg-white">
+      {/* Toggle Buttons */}
+      <div className="flex gap-2 mb-4">
+        <Button
+          variant={activeTab === "returned" ? "default" : "outline"}
+          onClick={() => setActiveTab("returned")}
+        >
+          Returned
+        </Button>
+        <Button
+          variant={activeTab === "rto" ? "default" : "outline"}
+          onClick={() => setActiveTab("rto")}
+        >
+          RTO
+        </Button>
       </div>
-      <div className="my-5">
+
+      {/* Conditional Rendering of Chart */}
+      {activeTab === "returned" ? (
+        <PieChartComp
+          title="Top Returned To Varee (RTV) Products"
+          data={chartData.top_returned_units ?? []}
+          dataKey="units_returned"
+          color="#FF9800"
+          legendLabel="Units Returned"
+          tooltipLabel="Returned Units"
+        />
+      ) : (
         <ProfitChart
           title="Top RTO Products"
           data={chartData.top_rto_units ?? []}
@@ -360,7 +400,11 @@ const Dashboard = () => {
           legendLabel="RTO Units"
           tooltipLabel="RTO Units"
         />
+      )}
+    </div>
+
       </div>
+      
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-1 mt-5">
@@ -375,30 +419,53 @@ const Dashboard = () => {
               Products generating the highest profit margins
             </CardDescription>
           </CardHeader>
-          <CardContent className="">
-            <table className="min-w-full divide-y divide-gray-200 text-sm table-auto">
-              <thead className="bg-gray-50 text-xs text-gray-700 uppercase tracking-wide">
-                <tr>
-                  <th className="px-4 py-3 text-left">SKU</th>
-                  <th className="px-4 py-3 text-right">Selling Price</th>
-                  <th className="px-4 py-3 text-right">Vendor Transfer</th>
-                  <th className="px-4 py-3 text-right">Unit</th>
-                  <th className="px-4 py-3 text-right">Final Cost</th>
-                  <th className="px-4 py-3 text-right">Profit (₹)</th>
-                  <th className="px-4 py-3 text-right">Profit (%)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 bg-white">
-                {topProfitable?.top_profitable_products?.map((product, index) => (
-                  <ProductCard
-                    key={product.sku}
-                    product={product}
-                    rank={index + 1}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
+         <CardContent>
+      <table className="min-w-full divide-y divide-gray-200 text-sm table-auto">
+        <thead className="bg-gray-50 text-xs text-gray-700 uppercase tracking-wide">
+          <tr>
+            <th className="px-4 py-3 text-left">SKU</th>
+            <th className="px-4 py-3 text-right">Selling Price</th>
+            <th className="px-4 py-3 text-right">Vendor Transfer</th>
+            <th className="px-4 py-3 text-right">Unit</th>
+            <th className="px-4 py-3 text-right">Final Cost</th>
+            <th className="px-4 py-3 text-right">Profit (₹)</th>
+            <th className="px-4 py-3 text-right">Profit (%)</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100 bg-white">
+          {paginatedData.map((product, index) => (
+            <ProductCard
+              key={product.sku}
+              product={product}
+              rank={(currentPage - 1) * rowsPerPage + index + 1}
+            />
+          ))}
+        </tbody>
+      </table>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mt-4">
+        <button
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+
+        <span className="text-sm">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </CardContent>
         </Card>
 
         <Card className="bg-gradient-card">
@@ -411,30 +478,53 @@ const Dashboard = () => {
               Products that need immediate attention
             </CardDescription>
           </CardHeader>
-          <CardContent className="">
-            <table className="min-w-full divide-y divide-gray-200 text-sm table-auto">
-              <thead className="bg-gray-50 text-xs text-gray-700 uppercase tracking-wide">
-                <tr>
-                  <th className="px-4 py-3 text-left">SKU</th>
-                  <th className="px-4 py-3 text-right">Selling Price</th>
-                  <th className="px-4 py-3 text-right">Vendor Transfer</th>
-                  <th className="px-4 py-3 text-right">Unit</th>
-                  <th className="px-4 py-3 text-right">Final Cost</th>
-                  <th className="px-4 py-3 text-right">Profit (₹)</th>
-                  <th className="px-4 py-3 text-right">Profit (%)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 bg-white">
-                {topLosses.map((product, index) => (
-                  <ProductCard
-                    key={product.sku}
-                    product={product}
-                    rank={index + 1}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
+           <CardContent>
+      <table className="min-w-full divide-y divide-gray-200 text-sm table-auto">
+        <thead className="bg-gray-50 text-xs text-gray-700 uppercase tracking-wide">
+          <tr>
+            <th className="px-4 py-3 text-left">SKU</th>
+            <th className="px-4 py-3 text-right">Selling Price</th>
+            <th className="px-4 py-3 text-right">Vendor Transfer</th>
+            <th className="px-4 py-3 text-right">Unit</th>
+            <th className="px-4 py-3 text-right">Final Cost</th>
+            <th className="px-4 py-3 text-right">Profit (₹)</th>
+            <th className="px-4 py-3 text-right">Profit (%)</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100 bg-white">
+          {paginatedData2.map((product, index) => (
+            <ProductCard
+              key={product.sku}
+              product={product}
+              rank={(currentPageLoss - 1) * rowsPerPage2 + index + 1}
+            />
+          ))}
+        </tbody>
+      </table>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mt-4">
+        <button
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          onClick={() => setCurrentPageLoss((p) => Math.max(p - 1, 1))}
+          disabled={currentPageLoss === 1}
+        >
+          Previous
+        </button>
+
+        <span className="text-sm">
+          Page {currentPageLoss} of {totalPages2}
+        </span>
+
+        <button
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          onClick={() => setCurrentPageLoss((p) => Math.min(p + 1, totalPages2))}
+          disabled={currentPageLoss === totalPages2}
+        >
+          Next
+        </button>
+      </div>
+    </CardContent>
         </Card>
 
       </div>

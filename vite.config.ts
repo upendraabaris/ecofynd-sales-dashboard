@@ -13,7 +13,8 @@ export default defineConfig(({ mode }) => ({
     host: "localhost",
     port: 8081,
     allowedHosts: [
-        'shcanary.platinum-infotech.com'
+        // 'shcanary.platinum-infotech.com'
+        'http://172.31.47.179:8081'
       ],
     // proxy: {
     //   '/api': {

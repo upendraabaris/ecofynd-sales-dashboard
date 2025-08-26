@@ -70,6 +70,8 @@ export interface ComparisonDetail {
   returned_count: ComparisonMetric;
   exchanged_amount: ComparisonMetric;
   exchanged_count: ComparisonMetric;
+  order_cancelled_amount: ComparisonMetric;
+  order_cancelled_count: ComparisonMetric;
 }
 
 export interface ComparisonMetric {

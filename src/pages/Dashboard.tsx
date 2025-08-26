@@ -299,6 +299,17 @@ const Dashboard = () => {
           trend="up"
         />
         <StatsCard
+          title="Order Cancelled"
+          value={`₹${salesData?.current_period?.summary?.order_cancelled_amount?.toFixed(2) ?? 0}`}
+          icon={IndianRupee}
+          unit="Unit"
+          count={salesData?.current_period?.summary?.order_cancelled_count}
+          comparison_percent={salesData?.comparison_percent?.order_cancelled_amount?.percent_change}
+          status={salesData?.comparison_percent?.order_cancelled_amount?.status}
+          // description="Total revenue minus costs"
+          trend="up"
+        />
+        <StatsCard
           title="Total Vendor Transfer"
           value={`₹${((data?.total_vendor_transfer ?? 0) + (data1?.total_vendor_transfer ?? 0))?.toFixed(2)}`}
           comparison_percent={vendorTransferData?.percent_change}

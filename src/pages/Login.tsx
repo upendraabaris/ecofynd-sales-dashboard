@@ -20,7 +20,7 @@ const Login = () => {
 
     // Simulate API call
     setTimeout(() => {
-      if (email && password) {
+      if (email === "ecofynd@gmail.com" && password === "ecofynd") {
         toast({
           title: "Login successful",
           description: "Welcome to Sales Insights Dashboard",
@@ -31,7 +31,7 @@ const Login = () => {
       } else {
         toast({
           title: "Login failed", 
-          description: "Please enter both email and password",
+          description: "Invalid email or password",
           variant: "destructive",
         });
       }
